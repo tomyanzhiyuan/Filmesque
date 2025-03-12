@@ -27,50 +27,48 @@ struct EditView: View {
             VStack(spacing: 0) {
                 // Image view area
                 ZStack {
-                    // Show original image when long press is active, otherwise show filtered image
-                    if isShowingOriginal, let originalImage = photoViewModel.selectedImage {
+                    // This is the key part: the order of the if-else conditions
+                        // determines which image gets priority
+                    // FIRST: Show the filtered image as the base layer (when available)
+                    if let filteredImage = photoViewModel.filteredImage, !isShowingOriginal {
+                        Image(uiImage: filteredImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
+                    } // SECOND: Show original image when held OR when no filter is applied yet
+                    else if let originalImage = photoViewModel.selectedImage {
                         Image(uiImage: originalImage)
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
                             .overlay(
+                                isShowingOriginal ?
                                 Text("Original Image")
                                     .font(.caption)
                                     .padding(6)
                                     .background(Color.black.opacity(0.6))
                                     .foregroundColor(.white)
                                     .cornerRadius(5)
-                                    .padding(8),
+                                    .padding(8) : nil,
                                 alignment: .top
                             )
-                    } else if let filteredImage = photoViewModel.filteredImage {
-                        // Display the filtered image if available, otherwise the original image
-                        Image(uiImage: filteredImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
-                    } else if let originalImage = photoViewModel.selectedImage {
-                        Image(uiImage: originalImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
                     }
                     
-                    // Loading indicator
-                    if photoViewModel.isProcessing {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(10)
-                            .padding(20)
-                    }
+//                    // Loading indicator
+//                    if photoViewModel.isProcessing {
+//                        ProgressView()
+//                            .scaleEffect(1.5)
+//                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+//                            .background(Color.black.opacity(0.5))
+//                            .cornerRadius(10)
+//                            .padding(20)
+//                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
                 .background(Color.black.opacity(0.1))
                 // Add long press gesture to toggle showing the original image
                 .gesture(
-                    LongPressGesture(minimumDuration: 0.1)
+                    DragGesture(minimumDistance: 0)
                         .onChanged { _ in
                             feedbackGenerator.impactOccurred()
                             isShowingOriginal = true
@@ -79,10 +77,10 @@ struct EditView: View {
                             isShowingOriginal = false
                         }
                 )
-                // Optional: Add a hint indicator when the app first launches
+                // Only show the hint when filtered image exists
                 .overlay(
                     Group {
-                        if let _ = photoViewModel.filteredImage {
+                        if photoViewModel.filteredImage != nil && !isShowingOriginal {
                             Text("Hold to see original")
                                 .font(.caption)
                                 .padding(6)
