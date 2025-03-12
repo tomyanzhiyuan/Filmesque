@@ -8,6 +8,9 @@
 import Foundation
 import SwiftUI
 import StoreKit
+import UIKit
+
+
 
 struct EditView: View {
     @EnvironmentObject private var photoViewModel: PhotoViewModel
@@ -16,6 +19,8 @@ struct EditView: View {
     @State private var showingSubscriptionView = false
     @State private var saveError: Error?
     @State private var isShowingOriginal = false // to track when the "hold" gesture is active
+    
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
     
     var body: some View {
         GeometryReader { geometry in
@@ -38,7 +43,7 @@ struct EditView: View {
                                     .padding(8),
                                 alignment: .top
                             )
-                    } else if let filteredImage = photoViewModel.filteredImage { 
+                    } else if let filteredImage = photoViewModel.filteredImage {
                         // Display the filtered image if available, otherwise the original image
                         Image(uiImage: filteredImage)
                             .resizable()
@@ -67,7 +72,7 @@ struct EditView: View {
                 .gesture(
                     LongPressGesture(minimumDuration: 0.1)
                         .onChanged { _ in
-                            hapticFeedback(.medium)
+                            feedbackGenerator.impactOccurred()
                             isShowingOriginal = true
                         }
                         .onEnded { _ in
@@ -181,6 +186,9 @@ struct EditView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .background(Color(UIColor.systemBackground))
+                .onAppear {
+                    feedbackGenerator.prepare()
+                }
             }
             .navigationTitle("Edit Photo")
             .navigationBarTitleDisplayMode(.inline)
@@ -224,5 +232,10 @@ struct EditView: View {
                 showingSaveConfirmation = true
             }
         }
+    }
+    // Helper method to provide haptic feedback
+    private func hapticFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.impactOccurred()
     }
 }
