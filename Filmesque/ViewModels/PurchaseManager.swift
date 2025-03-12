@@ -126,7 +126,7 @@ class PurchaseManager: ObservableObject {
             // Continuously listen for transactions
             for await result in Transaction.updates {
                 do {
-                    let transaction = try await self.checkVerified(result)
+                    let transaction = try self.checkVerified(result)
                     
                     // Update the list of purchased products
                     await self.updatePurchasedProducts()

@@ -5,7 +5,9 @@
 //  Created by Tom Yan Zhiyuan on 10/03/2025.
 //
 
+import Foundation
 import SwiftUI
+import StoreKit
 
 struct ContentView: View {
     @EnvironmentObject private var photoViewModel: PhotoViewModel
