@@ -14,13 +14,27 @@ class PhotoViewModel: ObservableObject {
     // Published properties that automatically update the UI
     @Published var selectedImage: UIImage? {
         didSet {
+            // Immediately clear the filtered image to prevent stale images from showing
+            self.filteredImage = nil
+            
             if let image = selectedImage {
                 currentPhoto = Photo(originalImage: image)
+                
+                // Reset filter intensity
+                self.filterIntensity = 1.0
+                
+                // Reset selected filter to original (optional)
+                if let originalFilter = filterPresets.first(where: { $0.filterType == .original }) {
+                    self.selectedFilter = originalFilter
+                }
                 // Generate small preview images for all filters
                 generateFilterPreviews()
+                
             } else {
+                // Clear everything if there's no image
                 currentPhoto = nil
                 filteredImage = nil
+                selectedFilter = nil
             }
         }
     }

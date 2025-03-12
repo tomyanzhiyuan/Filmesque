@@ -27,31 +27,35 @@ struct EditView: View {
             VStack(spacing: 0) {
                 // Image view area
                 ZStack {
-                    // This is the key part: the order of the if-else conditions
-                        // determines which image gets priority
-                    // FIRST: Show the filtered image as the base layer (when available)
-                    if let filteredImage = photoViewModel.filteredImage, !isShowingOriginal {
-                        Image(uiImage: filteredImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
-                    } // SECOND: Show original image when held OR when no filter is applied yet
-                    else if let originalImage = photoViewModel.selectedImage {
+                    // Use a clear if-else structure for mutually exclusive display states
+                    if isShowingOriginal, let originalImage = photoViewModel.selectedImage {
+                        // Case 1: Show original when holding (highest priority)
                         Image(uiImage: originalImage)
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
                             .overlay(
-                                isShowingOriginal ?
                                 Text("Original Image")
                                     .font(.caption)
                                     .padding(6)
                                     .background(Color.black.opacity(0.6))
                                     .foregroundColor(.white)
                                     .cornerRadius(5)
-                                    .padding(8) : nil,
+                                    .padding(8),
                                 alignment: .top
                             )
+                    } else if let filteredImage = photoViewModel.filteredImage {
+                        // Case 2: Show filtered image when available and not holding to see original
+                        Image(uiImage: filteredImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
+                    } else if let originalImage = photoViewModel.selectedImage {
+                        // Case 3: Fallback to original when no filtered image exists
+                        Image(uiImage: originalImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height * 0.7)
                     }
                     
 //                    // Loading indicator

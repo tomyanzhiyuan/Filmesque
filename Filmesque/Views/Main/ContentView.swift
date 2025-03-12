@@ -53,6 +53,16 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $photoViewModel.selectedImage)
+                .onDisappear {
+                    // Make sure we reset filter selection when a new image is picked
+                    if photoViewModel.selectedImage != nil {
+                        // Reset to original filter
+                        if let originalFilter = photoViewModel.filterPresets.first {
+                            photoViewModel.selectedFilter = originalFilter
+                            // No need to apply filter for original
+                        }
+                    }
+                }
         }
     }
 }
